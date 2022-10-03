@@ -1,3 +1,7 @@
+use chess::Game;
+
 fn main() {
-    println!("Hello, world!");
+    let mut game = Game::new();
+
+    println!("End of main");
 }
