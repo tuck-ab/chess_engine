@@ -4,13 +4,16 @@
 // use pieces::PieceType::*;
 // use pieces::Side::*;
 
-#[derive(Copy, Clone)]
+#[cfg(test)]
+mod tests;
+
+#[derive(Copy, Clone, Debug)]
 pub enum Side {
     Black,
     White
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum PieceType {
     King{has_moved: bool},
     Queen,
@@ -23,10 +26,33 @@ pub enum PieceType {
 use crate::PieceType::*;
 use crate::Side::*;
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum Coord {
+    Index (usize),
+    XandY (u8, u8)
+}
+
+impl Coord {
+    pub fn as_index(&self) -> Self {
+        match *self {
+            Coord::Index(_) => *self,
+            Coord::XandY(x, y) => Coord::Index((x + (8 * (7-y))).into())
+        }
+    }
+
+    pub fn as_x_and_y(&self) -> Self {
+        match *self {
+            Coord::Index(i) => Coord::XandY(i as u8 % 8, 7 - (i as u8 / 8)),
+            Coord::XandY(_, _) => *self
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
 pub struct Piece {
     piece_type: PieceType,
     side: Side,
+    loc: Coord
 }
 
 pub struct Game {
@@ -53,51 +79,63 @@ fn board_from_string(code: &str) -> Result<[Option<Piece>; 64], ParseError> {
         board[i] = match c {
             'K' => Some(Piece {
                 piece_type: King{has_moved:false},
-                side: White
+                side: White,
+                loc: Coord::Index(i)
             }),
             'k' => Some(Piece {
                 piece_type: King{has_moved: false},
-                side: Black
+                side: Black,
+                loc: Coord::Index(i)
             }),
             'Q' => Some(Piece {
                 piece_type: Queen,
-                side: White
+                side: White,
+                loc: Coord::Index(i)
             }),
             'q' => Some(Piece {
                 piece_type: Queen,
-                side: Black
+                side: Black,
+                loc: Coord::Index(i)
             }),
             'B' => Some(Piece {
                 piece_type: Bishop,
-                side: White
+                side: White,
+                loc: Coord::Index(i)
             }),
             'b' => Some(Piece {
                 piece_type: Bishop,
-                side: Black
+                side: Black,
+                loc: Coord::Index(i)
             }),
             'N' => Some(Piece {
                 piece_type: Knight,
-                side: White
+                side: White,
+                loc: Coord::Index(i)
             }),
             'n' => Some(Piece {
                 piece_type: Knight,
-                side: Black
+                side: Black,
+                loc: Coord::Index(i)
             }),
             'R' => Some(Piece {
                 piece_type: Rook{has_moved:false},
-                side: White
+                side: White,
+                loc: Coord::Index(i)
             }),
             'r' => Some(Piece {
                 piece_type: Rook{has_moved:false},
-                side: Black
+                side: Black,
+                loc: Coord::Index(i)
             }),
             'P' => Some(Piece {
                 piece_type: Pawn{has_moved:false},
-                side: White
+                side: White,
+                loc: Coord::Index(i)
             }),
             'p' => Some(Piece {
                 piece_type: Pawn{has_moved: false},
-                side: Black
+                side: Black,
+                loc: Coord::Index(i)
             }),
             '.' => None,
             _ => {return Err(ParseError::UnexpectedCharacter)}
