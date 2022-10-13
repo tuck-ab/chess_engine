@@ -29,7 +29,7 @@ use crate::Side::*;
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Coord {
     Index (usize),
-    XandY (u8, u8)
+    XandY (i8, i8)
 }
 
 impl Coord {
@@ -40,10 +40,24 @@ impl Coord {
         }
     }
 
+    pub fn get_index(&self) -> usize {
+        match *self {
+            Coord::Index(i) => i,
+            Coord::XandY(x, y) => (x + (8 * (7-y))).into()
+        }
+    }
+
     pub fn as_x_and_y(&self) -> Self {
         match *self {
-            Coord::Index(i) => Coord::XandY(i as u8 % 8, 7 - (i as u8 / 8)),
+            Coord::Index(i) => Coord::XandY(i as i8 % 8, 7 - (i as i8 / 8)),
             Coord::XandY(_, _) => *self
+        }
+    }
+
+    pub fn get_x_and_y(&self) -> [i8; 2] {
+        match *self {
+            Coord::Index(i) => [i as i8 % 8, 7 - (i as i8 / 8)],
+            Coord::XandY(x, y) => [x, y]
         }
     }
 }
