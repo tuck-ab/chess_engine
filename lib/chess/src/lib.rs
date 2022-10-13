@@ -7,7 +7,7 @@
 #[cfg(test)]
 mod tests;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Side {
     Black,
     White
@@ -69,15 +69,89 @@ pub struct Piece {
     loc: Coord
 }
 
+#[derive(Copy, Clone, Debug)]
+pub struct Move {
+    piece: PieceType,
+    from: Coord,
+    to: Coord
+}
+
 pub struct Game {
-    board: [Option<Piece>; 64]
+    board: [Option<Piece>; 64],
+    pieces: Vec<Piece>
 }
 
 impl Game {
     pub fn new() -> Self {
         let start_code = "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR";
+        let returned_board = board_from_string(start_code).unwrap();
+        let mut pieces = Vec::<Piece>::new();
+
+        returned_board.map(|x| {
+            match x {
+                Some(p) => pieces.push(p),
+                _ => {}
+            }
+        });
+
         Game { 
-            board: board_from_string(start_code).unwrap()
+            board: returned_board,
+            pieces
+        }
+    }
+
+    pub fn get_all_moves(&self, side: Side) {
+        let mut moves: Vec<Move> = Vec::<Move>::new();
+
+        for piece in &self.pieces {
+            if piece.side == side {
+                match piece.piece_type {
+                    King { has_moved } => {
+
+                    },
+                    Queen => {
+
+                    },
+                    Bishop => {
+
+                    },
+                    Knight => {
+
+                    },
+                    Rook { has_moved } => {
+                        for dir in [[1,0], [0,1], [-1,0], [0,-1]] {
+                            let finding = true;
+                            while finding {
+                                let [x, y] = piece.loc.get_x_and_y();
+                                x += dir[0];
+                                y += dir[1];
+
+                                let square = &self.board[Coord::XandY(x, y).get_index()];
+                                match &self.board[Coord::XandY(x, y).get_index()] {
+                                    Some(p) => {
+                                        finding = false;
+                                        if p.side != side {
+                                            moves.push(Move { 
+                                                piece: Rook { has_moved: true }, 
+                                                from: piece.loc.clone(), 
+                                                to: Coord::XandY(x, y) })
+                                        }
+                                    },
+                                    None => {
+                                        moves.push(Move { 
+                                            piece: Rook { has_moved: true }, 
+                                            from: piece.loc.clone(), 
+                                            to: Coord::XandY(x, y) })
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    Pawn { has_moved } => {
+
+                    }
+                }
+            }
         }
     }
 }
