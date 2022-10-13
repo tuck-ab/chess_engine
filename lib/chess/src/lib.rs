@@ -36,14 +36,14 @@ impl Coord {
     pub fn as_index(&self) -> Self {
         match *self {
             Coord::Index(_) => *self,
-            Coord::XandY(x, y) => Coord::Index((x + (8 * (7-y))).into())
+            Coord::XandY(x, y) => Coord::Index(x as usize + (8 * (7-(y as usize))))
         }
     }
 
     pub fn get_index(&self) -> usize {
         match *self {
             Coord::Index(i) => i,
-            Coord::XandY(x, y) => (x + (8 * (7-y))).into()
+            Coord::XandY(x, y) => (x as usize + (8 * (7-(y as usize))))
         }
     }
 
@@ -113,35 +113,41 @@ impl Game {
 
                     },
                     Bishop => {
-
+                        
                     },
                     Knight => {
 
                     },
                     Rook { has_moved } => {
                         for dir in [[1,0], [0,1], [-1,0], [0,-1]] {
-                            let finding = true;
+                            let mut finding = true;
                             while finding {
-                                let [x, y] = piece.loc.get_x_and_y();
+                                let [mut x, mut y] = piece.loc.get_x_and_y();
                                 x += dir[0];
                                 y += dir[1];
 
-                                let square = &self.board[Coord::XandY(x, y).get_index()];
-                                match &self.board[Coord::XandY(x, y).get_index()] {
-                                    Some(p) => {
-                                        finding = false;
-                                        if p.side != side {
+                                // If the new coord is still on the board
+                                if !(x < 0 || x > 7 || y < 0 || y > 7) {
+                                    // Check square on board for piece
+                                    match &self.board[Coord::XandY(x, y).get_index()] {
+                                        Some(p) => { // If there is a piece
+                                            // End the search in direction as piece can't jump
+                                            finding = false; 
+
+                                            // If the peice is opposite colour then its a valid move
+                                            if p.side != side { 
+                                                moves.push(Move { 
+                                                    piece: Rook { has_moved: true }, 
+                                                    from: piece.loc.clone(), 
+                                                    to: Coord::XandY(x, y) })
+                                            }
+                                        },
+                                        None => { // If there is no piece then its a valid move
                                             moves.push(Move { 
                                                 piece: Rook { has_moved: true }, 
                                                 from: piece.loc.clone(), 
                                                 to: Coord::XandY(x, y) })
                                         }
-                                    },
-                                    None => {
-                                        moves.push(Move { 
-                                            piece: Rook { has_moved: true }, 
-                                            from: piece.loc.clone(), 
-                                            to: Coord::XandY(x, y) })
                                     }
                                 }
                             }
