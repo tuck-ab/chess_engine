@@ -26,10 +26,32 @@ fn game_test() {
 
 #[test]
 fn rook_test() {
-    let rook_test_code = "r..............................................................R";
+    let rook_test_code = "r.......p......p...............................................R";
     let mut game = Game::from_string(rook_test_code).unwrap();
 
     let moves = game.get_all_moves(White);
 
-    assert_eq!(moves.len(), 14);
+    assert_eq!(moves.len(), 13);
+
+    let possible_move = Move {
+        piece: Rook { has_moved: true },
+        from: Coord::XandY(7, 0),
+        to: Coord::XandY(7, 5)
+    };
+
+    let not_possible_move = Move {
+        piece: Rook {has_moved: true},
+        from: Coord::XandY(7, 0),
+        to: Coord::XandY(7, 7)
+    };
+
+    let takes_possible_move = Move {
+        piece: Rook { has_moved: true },
+        from: Coord::XandY(7, 0),
+        to: Coord::XandY(7, 6)
+    };
+
+    assert!(moves.contains(&possible_move));
+    assert!(!moves.contains(&not_possible_move));
+    assert!(moves.contains(&takes_possible_move));
 }
