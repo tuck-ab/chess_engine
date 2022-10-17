@@ -13,7 +13,7 @@ pub enum Side {
     White
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PieceType {
     King{has_moved: bool},
     Queen,
@@ -26,10 +26,16 @@ pub enum PieceType {
 use crate::PieceType::*;
 use crate::Side::*;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug)]
 pub enum Coord {
     Index (usize),
     XandY (i8, i8)
+}
+
+impl PartialEq for Coord {
+    fn eq(&self, other: &Self) -> bool {
+        self.get_index() == other.get_index()
+    }
 }
 
 impl Coord {
@@ -62,14 +68,14 @@ impl Coord {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Piece {
     piece_type: PieceType,
     side: Side,
     loc: Coord
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Move {
     piece: PieceType,
     from: Coord,
@@ -84,23 +90,25 @@ pub struct Game {
 impl Game {
     pub fn new() -> Self {
         let start_code = "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR";
-        let returned_board = board_from_string(start_code).unwrap();
+        Game::from_string(start_code).unwrap()
+    }
+
+    pub fn from_string(code: &str) -> Result<Self, ParseError>{
+        let board = board_from_string(code)?;
+
         let mut pieces = Vec::<Piece>::new();
 
-        returned_board.map(|x| {
+        board.map(|x| {
             match x {
                 Some(p) => pieces.push(p),
                 _ => {}
             }
         });
 
-        Game { 
-            board: returned_board,
-            pieces
-        }
+        Ok(Game{board, pieces})
     }
 
-    pub fn get_all_moves(&self, side: Side) {
+    pub fn get_all_moves(&self, side: Side) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::<Move>::new();
 
         for piece in &self.pieces {
@@ -121,8 +129,9 @@ impl Game {
                     Rook { has_moved } => {
                         for dir in [[1,0], [0,1], [-1,0], [0,-1]] {
                             let mut finding = true;
+                            let [mut x, mut y] = piece.loc.get_x_and_y();
+
                             while finding {
-                                let [mut x, mut y] = piece.loc.get_x_and_y();
                                 x += dir[0];
                                 y += dir[1];
 
@@ -149,6 +158,8 @@ impl Game {
                                                 to: Coord::XandY(x, y) })
                                         }
                                     }
+                                } else {
+                                    finding = false;
                                 }
                             }
                         }
@@ -159,11 +170,13 @@ impl Game {
                 }
             }
         }
+        
+        moves
     }
 }
 
 #[derive(Debug)]
-enum ParseError {
+pub enum ParseError {
     UnexpectedCharacter
 }
 
