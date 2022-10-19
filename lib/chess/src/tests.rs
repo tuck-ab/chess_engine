@@ -55,3 +55,37 @@ fn rook_test() {
     assert!(!moves.contains(&not_possible_move));
     assert!(moves.contains(&takes_possible_move));
 }
+
+#[test]
+fn bishop_test() {
+    let bishop_test_code = ".........B............................................p.........";
+    let mut game = Game::from_string(bishop_test_code).unwrap();
+
+    let moves = game.get_all_moves(White);
+
+    println!("{:?}", moves);
+
+    assert_eq!(moves.len(), 8);
+
+    let possible_move = Move {
+        piece: Bishop,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(4, 3)
+    };
+
+    let not_possible_move = Move {
+        piece: Bishop,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(7, 0)
+    };
+
+    let takes_possible_move = Move {
+        piece: Bishop,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(6, 1)
+    };
+
+    assert!(moves.contains(&possible_move));
+    assert!(!moves.contains(&not_possible_move));
+    assert!(moves.contains(&takes_possible_move));
+}
