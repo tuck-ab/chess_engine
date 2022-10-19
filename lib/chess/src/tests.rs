@@ -63,8 +63,6 @@ fn bishop_test() {
 
     let moves = game.get_all_moves(White);
 
-    println!("{:?}", moves);
-
     assert_eq!(moves.len(), 8);
 
     let possible_move = Move {
