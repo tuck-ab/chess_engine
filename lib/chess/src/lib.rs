@@ -139,14 +139,16 @@ impl Game {
                                                 moves.push(Move { 
                                                     piece: Queen, 
                                                     from: piece.loc.clone(), 
-                                                    to: Coord::XandY(x, y) })
+                                                    to: Coord::XandY(x, y) 
+                                                })
                                             }
                                         },
                                         None => { // If there is no piece then its a valid move
                                             moves.push(Move { 
                                                 piece: Queen, 
                                                 from: piece.loc.clone(), 
-                                                to: Coord::XandY(x, y) })
+                                                to: Coord::XandY(x, y) 
+                                            })
                                         }
                                     }
                                 } else {
@@ -177,14 +179,16 @@ impl Game {
                                                 moves.push(Move { 
                                                     piece: Bishop, 
                                                     from: piece.loc.clone(), 
-                                                    to: Coord::XandY(x, y) })
+                                                    to: Coord::XandY(x, y) 
+                                                })
                                             }
                                         },
                                         None => { // If there is no piece then its a valid move
                                             moves.push(Move { 
                                                 piece: Bishop, 
                                                 from: piece.loc.clone(), 
-                                                to: Coord::XandY(x, y) })
+                                                to: Coord::XandY(x, y) 
+                                            })
                                         }
                                     }
                                 } else {
@@ -218,14 +222,16 @@ impl Game {
                                                 moves.push(Move { 
                                                     piece: Rook { has_moved: true }, 
                                                     from: piece.loc.clone(), 
-                                                    to: Coord::XandY(x, y) })
+                                                    to: Coord::XandY(x, y) 
+                                                })
                                             }
                                         },
                                         None => { // If there is no piece then its a valid move
                                             moves.push(Move { 
                                                 piece: Rook { has_moved: true }, 
                                                 from: piece.loc.clone(), 
-                                                to: Coord::XandY(x, y) })
+                                                to: Coord::XandY(x, y) 
+                                            })
                                         }
                                     }
                                 } else {
