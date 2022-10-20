@@ -97,4 +97,47 @@ fn queen_test() {
 
     // 8 Bishop like moves, 13 Rook like moves
     assert_eq!(moves.len(), 8 + 13);
+
+    let possible_move_diag = Move {
+        piece: Queen,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(4, 3)
+    };
+
+    let possible_move_vert = Move {
+        piece: Queen,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(7, 6)
+    };
+
+    let impossible_move_diag = Move {
+        piece: Queen,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(7, 0)
+    };
+
+    let impossible_move_vert = Move {
+        piece: Queen,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(1, 0)
+    };
+
+    let takes_move_diag = Move {
+        piece: Queen,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(6, 1)
+    };
+
+    let takes_move_vert = Move {
+        piece: Queen,
+        from: Coord::XandY(1, 6),
+        to: Coord::XandY(1, 1)
+    };
+
+    assert!(moves.contains(&possible_move_diag));
+    assert!(moves.contains(&possible_move_vert));
+    assert!(!moves.contains(&impossible_move_diag));
+    assert!(!moves.contains(&impossible_move_vert));
+    assert!(moves.contains(&takes_move_diag));
+    assert!(moves.contains(&takes_move_vert));
 }
