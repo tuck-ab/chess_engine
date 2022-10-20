@@ -87,3 +87,14 @@ fn bishop_test() {
     assert!(!moves.contains(&not_possible_move));
     assert!(moves.contains(&takes_possible_move));
 }
+
+#[test]
+fn queen_test() {
+    let queen_test_code = ".........Q.......................................p....p.........";
+    let game = Game::from_string(queen_test_code).unwrap();
+
+    let moves = game.get_all_moves(White);
+
+    // 8 Bishop like moves, 13 Rook like moves
+    assert_eq!(moves.len(), 8 + 13);
+}
