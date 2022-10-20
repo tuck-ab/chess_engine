@@ -161,7 +161,7 @@ impl Game {
                     Knight => {
 
                     },
-                    Rook { has_moved } => {
+                    Rook { has_moved: _ } => {
                         for dir in [[1,0], [0,1], [-1,0], [0,-1]] {
                             let mut finding = true;
                             let [mut x, mut y] = piece.loc.get_x_and_y();
