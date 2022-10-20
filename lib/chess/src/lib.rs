@@ -118,7 +118,42 @@ impl Game {
 
                     },
                     Queen => {
+                        for dir in [[1,1], [-1,1], [1,-1], [-1,-1], [1,0], [0,1], [-1,0], [0,-1]] {
+                            let mut finding = true;
+                            let [mut x, mut y] = piece.loc.get_x_and_y();
 
+                            while finding {
+                                x += dir[0];
+                                y += dir[1];
+
+                                // If the new coord is still on the board
+                                if !(x < 0 || x > 7 || y < 0 || y > 7) {
+                                    // Check square on board for piece
+                                    match &self.board[Coord::XandY(x, y).get_index()] {
+                                        Some(p) => { // If there is a piece
+                                            // End the search in direction as piece can't jump
+                                            finding = false; 
+
+                                            // If the peice is opposite colour then its a valid move
+                                            if p.side != side { 
+                                                moves.push(Move { 
+                                                    piece: Queen, 
+                                                    from: piece.loc.clone(), 
+                                                    to: Coord::XandY(x, y) })
+                                            }
+                                        },
+                                        None => { // If there is no piece then its a valid move
+                                            moves.push(Move { 
+                                                piece: Queen, 
+                                                from: piece.loc.clone(), 
+                                                to: Coord::XandY(x, y) })
+                                        }
+                                    }
+                                } else {
+                                    finding = false;
+                                }
+                            }
+                        }
                     },
                     Bishop => {
                         for dir in [[1,1], [-1,1], [1,-1], [-1,-1]] {
@@ -161,7 +196,7 @@ impl Game {
                     Knight => {
 
                     },
-                    Rook { has_moved } => {
+                    Rook { has_moved: _ } => {
                         for dir in [[1,0], [0,1], [-1,0], [0,-1]] {
                             let mut finding = true;
                             let [mut x, mut y] = piece.loc.get_x_and_y();

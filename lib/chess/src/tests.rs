@@ -27,7 +27,7 @@ fn game_test() {
 #[test]
 fn rook_test() {
     let rook_test_code = "r.......p......p...............................................R";
-    let mut game = Game::from_string(rook_test_code).unwrap();
+    let game = Game::from_string(rook_test_code).unwrap();
 
     let moves = game.get_all_moves(White);
 
@@ -59,7 +59,7 @@ fn rook_test() {
 #[test]
 fn bishop_test() {
     let bishop_test_code = ".........B............................................p.........";
-    let mut game = Game::from_string(bishop_test_code).unwrap();
+    let game = Game::from_string(bishop_test_code).unwrap();
 
     let moves = game.get_all_moves(White);
 
