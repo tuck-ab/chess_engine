@@ -272,6 +272,50 @@ impl Game {
                         }
                     },
                     Pawn { has_moved } => {
+                        // Find which way is forward based off side
+                        let direction: i8 = match side {
+                            White => 1,
+                            Black => -1
+                        };
+
+                        let [x, y] = piece.loc.get_x_and_y();
+
+                        // Forward moves
+                        if self.board[Coord::XandY(x, y + direction).get_index()].is_none() {
+                            moves.push(Move {
+                                piece: Pawn {has_moved: true},
+                                from: Coord::XandY(x, y),
+                                to: Coord::XandY(x, y + direction)
+                            });
+                        
+                            // Two forward if it hasn't moved
+                            if !has_moved && self.board[Coord::XandY(x, y + (2*direction)).get_index()].is_none() {
+                                moves.push(Move {
+                                    piece: Pawn {has_moved: true},
+                                    from: Coord::XandY(x, y),
+                                    to: Coord::XandY(x, y + (2*direction))
+                                });
+                            }
+                        }
+
+                        // Diagonal taking
+                        for dx in [1, -1] {
+                            if !(x + dx < 0 || x + dx > 7) {
+                                self.board[Coord::XandY(x + dx, y + direction).get_index()]
+                                .map(|p| {
+                                    if p.side != side {
+                                        moves.push(Move {
+                                            piece: Pawn {has_moved: true},
+                                            from: Coord::XandY(x, y),
+                                            to: Coord::XandY(x + dx, y + direction)
+                                        });
+                                    }
+                                });
+                            }
+                        }
+
+                        // En passent
+
 
                     }
                 }

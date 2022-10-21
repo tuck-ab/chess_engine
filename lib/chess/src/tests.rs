@@ -159,3 +159,23 @@ fn knight_test() {
 
     assert!(moves.contains(&possible_move))
 }
+
+#[test]
+fn pawn_test() {
+    let basic_pawn_test_code = "............................................q.q......P.P........";
+    let game = Game::from_string(basic_pawn_test_code).unwrap();
+
+    let moves = game.get_all_moves(White);
+
+    assert_eq!(moves.len(), 7);
+
+    let possible_takes_move = Move {
+        piece: Pawn {has_moved: true},
+        from: Coord::XandY(7, 1),
+        to: Coord::XandY(6, 2)
+    };
+
+
+
+    assert!(moves.contains(&possible_takes_move));
+}
