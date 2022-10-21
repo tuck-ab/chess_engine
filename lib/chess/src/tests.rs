@@ -141,3 +141,21 @@ fn queen_test() {
     assert!(moves.contains(&takes_move_diag));
     assert!(moves.contains(&takes_move_vert));
 }
+
+#[test]
+fn knight_test() {
+    let knight_test_code = "...................N............................................";
+    let game = Game::from_string(knight_test_code).unwrap();
+
+    let moves = game.get_all_moves(White);
+
+    assert_eq!(moves.len(), 8);
+
+    let possible_move = Move {
+        piece: Knight,
+        from: Coord::XandY(3, 5),
+        to: Coord::XandY(1, 6)
+    };
+
+    assert!(moves.contains(&possible_move))
+}

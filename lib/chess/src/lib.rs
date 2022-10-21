@@ -198,7 +198,38 @@ impl Game {
                         }
                     },
                     Knight => {
+                        for dir in [[2,1], [2,-1], [1,2], [1,-2], [-2, 1], [-2,-1], [-1,2], [-1,-2]] {
+                            let [mut x, mut y] = piece.loc.get_x_and_y();
 
+                            x += dir[0];
+                            y += dir[1];
+
+                            // If the new coord is still on the board
+                            if !(x < 0 || x > 7 || y < 0 || y > 7) {
+                                // Check square on board for piece
+                                match &self.board[Coord::XandY(x, y).get_index()] {
+                                    // If there is a piece there
+                                    Some(p) => {
+                                        // Add move if it can be taken
+                                        if p.side != side {
+                                            moves.push(Move {
+                                                piece: Knight,
+                                                from: piece.loc.clone(),
+                                                to: Coord::XandY(x, y)
+                                            })
+                                        }
+                                    },
+                                    // If there is no piece there
+                                    None => {
+                                        moves.push(Move {
+                                            piece: Knight,
+                                            from: piece.loc.clone(),
+                                            to: Coord::XandY(x, y)
+                                        })
+                                    }
+                                }
+                            }
+                        }
                     },
                     Rook { has_moved: _ } => {
                         for dir in [[1,0], [0,1], [-1,0], [0,-1]] {
