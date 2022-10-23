@@ -98,12 +98,7 @@ impl Game {
 
         let mut pieces = Vec::<Piece>::new();
 
-        board.map(|x| {
-            match x {
-                Some(p) => pieces.push(p),
-                _ => {}
-            }
-        });
+        board.map(|x| x.map(|p| pieces.push(p)));
 
         Ok(Game{board, pieces})
     }
