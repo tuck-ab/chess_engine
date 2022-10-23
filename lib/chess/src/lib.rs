@@ -87,6 +87,29 @@ pub struct Game {
     pieces: Vec<Piece>
 }
 
+impl std::fmt::Debug for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut out_str = String::new();
+        
+        for (i, op) in self.board.iter().enumerate() {
+            if i % 8 == 0 {
+                writeln!(f, "{}", out_str)?;
+                out_str = String::new();
+            }
+
+            match op {
+                Some(p) => out_str.push(get_piece_char(p)),
+                None => out_str.push('.')
+            }
+            out_str.push(' ');
+        }     
+
+        writeln!(f, "{}", out_str)?;
+
+        Ok(())
+    }
+}
+
 impl Game {
     pub fn new() -> Self {
         let start_code = "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR";
@@ -324,6 +347,23 @@ impl Game {
 #[derive(Debug)]
 pub enum ParseError {
     UnexpectedCharacter
+}
+
+fn get_piece_char(piece: &Piece) -> char {
+    let out_char = match piece.piece_type {
+        King {has_moved: _} => 'K',
+        Queen => 'Q',
+        Bishop => 'B',
+        Knight => 'N',
+        Rook {has_moved: _} => 'R',
+        Pawn {has_moved: _} => 'P'
+    };
+
+    if piece.side == Black {
+        out_char.to_ascii_lowercase()
+    } else {
+        out_char
+    }
 }
 
 fn board_from_string(code: &str) -> Result<[Option<Piece>; 64], ParseError> {
