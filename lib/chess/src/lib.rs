@@ -368,71 +368,32 @@ fn get_piece_char(piece: &Piece) -> char {
 
 fn board_from_string(code: &str) -> Result<[Option<Piece>; 64], ParseError> {
     let mut board:[Option<Piece>; 64] = [None; 64];
+
+    // Loop through all the chars in the input string with an index
     for (i, c) in code.chars().enumerate() {
-        board[i] = match c {
-            'K' => Some(Piece {
-                piece_type: King{has_moved:false},
-                side: White,
-                loc: Coord::Index(i)
-            }),
-            'k' => Some(Piece {
-                piece_type: King{has_moved: false},
-                side: Black,
-                loc: Coord::Index(i)
-            }),
-            'Q' => Some(Piece {
-                piece_type: Queen,
-                side: White,
-                loc: Coord::Index(i)
-            }),
-            'q' => Some(Piece {
-                piece_type: Queen,
-                side: Black,
-                loc: Coord::Index(i)
-            }),
-            'B' => Some(Piece {
-                piece_type: Bishop,
-                side: White,
-                loc: Coord::Index(i)
-            }),
-            'b' => Some(Piece {
-                piece_type: Bishop,
-                side: Black,
-                loc: Coord::Index(i)
-            }),
-            'N' => Some(Piece {
-                piece_type: Knight,
-                side: White,
-                loc: Coord::Index(i)
-            }),
-            'n' => Some(Piece {
-                piece_type: Knight,
-                side: Black,
-                loc: Coord::Index(i)
-            }),
-            'R' => Some(Piece {
-                piece_type: Rook{has_moved:false},
-                side: White,
-                loc: Coord::Index(i)
-            }),
-            'r' => Some(Piece {
-                piece_type: Rook{has_moved:false},
-                side: Black,
-                loc: Coord::Index(i)
-            }),
-            'P' => Some(Piece {
-                piece_type: Pawn{has_moved:false},
-                side: White,
-                loc: Coord::Index(i)
-            }),
-            'p' => Some(Piece {
-                piece_type: Pawn{has_moved: false},
-                side: Black,
-                loc: Coord::Index(i)
-            }),
-            '.' => None,
+        // Work out the piece type
+        let piece_type = match c.to_ascii_uppercase() {
+            'K' => King {has_moved: false},
+            'Q' => Queen,
+            'B' => Bishop,
+            'N' => Knight,
+            'R' => Rook {has_moved: false},
+            'P' => Pawn {has_moved: false},
+            // If its an empty square then set it in the board and continue
+            '.' => {board[i] = None; continue},
+            // Error handling
             _ => {return Err(ParseError::UnexpectedCharacter)}
         };
+    
+        // Work out the side of the piece
+        let side = if c.is_ascii_uppercase() { White } else { Black };
+
+        // Add the piece to the board
+        board[i] = Some(Piece{
+            piece_type,
+            side,
+            loc: Coord::Index(i)
+        });
     }
 
     Ok(board)
