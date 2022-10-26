@@ -75,6 +75,26 @@ pub struct Piece {
     loc: Coord
 }
 
+impl Piece {
+    fn is_white(&self) -> bool {
+        match self.side {
+            White => true,
+            Black => false
+        }
+    }
+
+    fn is_black(&self) -> bool {
+        match self.side {
+            White => false,
+            Black => true
+        }
+    }
+
+    fn is_same_side(&self, other: &Self) -> bool {
+        self.side == other.side
+    }
+}
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Move {
     piece: PieceType,

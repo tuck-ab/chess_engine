@@ -13,6 +13,28 @@ fn coord_test() {
 }
 
 #[test]
+fn piece_tests() {
+    let test_piece_white = Piece {
+        piece_type: Queen,
+        side: White,
+        loc: Coord::XandY(4, 4)
+    };
+
+    let test_piece_black = Piece {
+        piece_type: Queen,
+        side: Black,
+        loc: Coord::XandY(5, 5)
+    };
+
+    assert!(test_piece_black.is_black());
+    assert!(test_piece_white.is_white());
+    assert!(!test_piece_black.is_white());
+    assert!(!test_piece_white.is_black());
+
+    assert!(!test_piece_black.is_same_side(&test_piece_white))
+}
+
+#[test]
 fn game_test() {
     let game = Game::new();
 
