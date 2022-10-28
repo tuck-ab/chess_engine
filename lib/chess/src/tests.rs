@@ -38,7 +38,8 @@ fn piece_tests() {
 fn game_test() {
     let game = Game::new();
 
-    assert_eq!(game.pieces.len(), 32);
+    assert_eq!(game.white_pieces.len(), 16);
+    assert_eq!(game.black_pieces.len(), 16);
     assert_eq!(game.board[Coord::XandY(0,0).get_index()], Some(Piece {
         piece_type: Rook { has_moved: false },
         side: White,

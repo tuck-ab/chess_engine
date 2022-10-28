@@ -93,6 +93,13 @@ impl Piece {
     fn is_same_side(&self, other: &Self) -> bool {
         self.side == other.side
     }
+
+    fn is_king(&self) -> bool {
+        match self.piece_type {
+            King { has_moved: _ } => true,
+            _ => false
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -104,7 +111,10 @@ pub struct Move {
 
 pub struct Game {
     board: [Option<Piece>; 64],
-    pieces: Vec<Piece>
+    white_pieces: Vec<Piece>,
+    black_pieces: Vec<Piece>,
+    white_king: Piece,
+    black_king: Piece
 }
 
 impl std::fmt::Debug for Game {
@@ -139,17 +149,52 @@ impl Game {
     pub fn from_string(code: &str) -> Result<Self, ParseError>{
         let board = board_from_string(code)?;
 
-        let mut pieces = Vec::<Piece>::new();
+        let mut white_pieces = Vec::<Piece>::new();
+        let mut black_pieces = Vec::<Piece>::new();
 
-        board.map(|x| x.map(|p| pieces.push(p)));
+        let mut white_king_op: Option<Piece> = None;
+        let mut black_king_op: Option<Piece> = None;
 
-        Ok(Game{board, pieces})
+        for p in board {
+            if p.is_none() {continue}
+
+            let piece = p.unwrap();
+
+            if piece.is_king() {
+                match piece.side {
+                    White => white_king_op = Some(piece),
+                    Black => black_king_op = Some(piece)
+                }
+            } else {
+                match piece.side {
+                    White => white_pieces.push(piece),
+                    Black => black_pieces.push(piece)
+                };
+            }
+        }
+
+        let white_king = if white_king_op.is_some() {
+            white_king_op.unwrap()
+        } else {
+            return Err(ParseError::NoWhiteKing)
+        };
+
+        let black_king = if black_king_op.is_some() {
+            black_king_op.unwrap()
+        } else {
+            return Err(ParseError::NoBlackKing)
+        };
+
+        Ok(Game{board, white_pieces, black_pieces, white_king, black_king})
     }
 
     pub fn get_all_moves(&self, side: Side) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::<Move>::new();
 
-        for piece in &self.pieces {
+        for piece in match side {
+            White => &self.white_pieces,
+            Black => &self.black_pieces
+        } {
             if piece.side == side {
                 match piece.piece_type {
                     King { has_moved } => {
@@ -366,7 +411,9 @@ impl Game {
 
 #[derive(Debug)]
 pub enum ParseError {
-    UnexpectedCharacter
+    UnexpectedCharacter,
+    NoWhiteKing,
+    NoBlackKing
 }
 
 fn get_piece_char(piece: &Piece) -> char {
