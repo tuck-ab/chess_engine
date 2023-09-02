@@ -1,204 +1,410 @@
-use crate::*;
+use crate::coord::*;
+use crate::game::*;
+use crate::moves::*;
+use crate::pieces::*;
 
-// Coords test
 #[test]
 fn coord_test() {
-    assert_eq!(Coord::Index(0), Coord::XandY(0, 7));
-    assert_eq!(Coord::Index(63), Coord::XandY(7, 0));
-    assert_eq!(Coord::Index(12), Coord::XandY(4, 6));
+    assert_eq!(Coord::from_index(0), Coord::from_x_and_y(0, 7));
+    assert_eq!(Coord::from_index(63), Coord::from_x_and_y(7, 0));
+    assert_eq!(Coord::from_index(12), Coord::from_x_and_y(4, 6));
 
-    assert_eq!(Coord::XandY(0, 7), Coord::Index(0));
-    assert_eq!(Coord::XandY(7, 0), Coord::Index(63));
-    assert_eq!(Coord::XandY(0, 0), Coord::Index(56));
+    assert_eq!(Coord::from_x_and_y(0, 7), Coord::from_index(0));
+    assert_eq!(Coord::from_x_and_y(7, 0), Coord::from_index(63));
+    assert_eq!(Coord::from_x_and_y(0, 0), Coord::from_index(56));
 }
 
 #[test]
-fn piece_tests() {
-    let test_piece_white = Piece {
-        piece_type: Queen,
-        side: White,
-        loc: Coord::XandY(4, 4)
-    };
+fn king_into_check_test() {
+    let start_code = "..K.k...\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let white_king = game.get_white_king();
+    let moves = get_piece_moves(&game, white_king);
 
-    let test_piece_black = Piece {
-        piece_type: Queen,
-        side: Black,
-        loc: Coord::XandY(5, 5)
-    };
-
-    assert!(test_piece_black.is_black());
-    assert!(test_piece_white.is_white());
-    assert!(!test_piece_black.is_white());
-    assert!(!test_piece_white.is_black());
-
-    assert!(!test_piece_black.is_same_side(&test_piece_white))
+    assert_eq!(moves.len(), 3)
 }
 
 #[test]
-fn game_test() {
-    let game = Game::new();
+fn pin_test() {
+    let start_code = "....k...\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ....q...\
+                      ....Q...\
+                      ....K...";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let white_king = game.get_white_king();
+    let moves = get_piece_moves(&game, white_king);
 
-    assert_eq!(game.white_pieces.len(), 16);
-    assert_eq!(game.black_pieces.len(), 16);
-    assert_eq!(game.board[Coord::XandY(0,0).get_index()], Some(Piece {
-        piece_type: Rook { has_moved: false },
-        side: White,
-        loc: Coord::XandY(0,0)
-    }))
+    assert_eq!(moves.len(), 2)
 }
 
 #[test]
-fn rook_test() {
-    let rook_test_code = "r.......p......p...............................................R";
-    let game = Game::from_string(rook_test_code).unwrap();
+fn king_moves() {
+    let start_code = "....k...\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ....K...";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let white_king = game.get_white_king();
+    let moves = get_piece_moves(&game, white_king);
 
-    let moves = game.get_all_moves(White);
-
-    assert_eq!(moves.len(), 13);
-
-    let possible_move = Move {
-        piece: Rook { has_moved: true },
-        from: Coord::XandY(7, 0),
-        to: Coord::XandY(7, 5)
-    };
-
-    let not_possible_move = Move {
-        piece: Rook {has_moved: true},
-        from: Coord::XandY(7, 0),
-        to: Coord::XandY(7, 7)
-    };
-
-    let takes_possible_move = Move {
-        piece: Rook { has_moved: true },
-        from: Coord::XandY(7, 0),
-        to: Coord::XandY(7, 6)
-    };
-
-    assert!(moves.contains(&possible_move));
-    assert!(!moves.contains(&not_possible_move));
-    assert!(moves.contains(&takes_possible_move));
+    assert_eq!(moves.len(), 5);
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        Piece::new(Side::White, false, PieceType::King, Coord::from_x_and_y(4, 0)),
+        Coord::from_x_and_y(4, 0),
+        Coord::from_x_and_y(3, 0)
+    ))));
+    assert!(!moves.contains(&Move::Standard(StandardMove::new(
+        Piece::new(Side::White, false, PieceType::King, Coord::from_x_and_y(4, 0)),
+        Coord::from_x_and_y(4, 0),
+        Coord::from_x_and_y(5, 5)
+    ))));
 }
 
 #[test]
-fn bishop_test() {
-    let bishop_test_code = ".........B............................................p.........";
-    let game = Game::from_string(bishop_test_code).unwrap();
+fn queen_moves() {
+    let start_code = "....k..K\
+                      Q.......\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::White,
+        false,
+        PieceType::Queen,
+        Coord::from_x_and_y(0, 6)
+    );
 
-    let moves = game.get_all_moves(White);
+    let moves = get_piece_moves(&game, piece);
 
-    assert_eq!(moves.len(), 8);
+    assert_eq!(moves.len(), 7+7+1+6);
 
-    let possible_move = Move {
-        piece: Bishop,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(4, 3)
-    };
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(0, 0)
+    ))));
 
-    let not_possible_move = Move {
-        piece: Bishop,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(7, 0)
-    };
-
-    let takes_possible_move = Move {
-        piece: Bishop,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(6, 1)
-    };
-
-    assert!(moves.contains(&possible_move));
-    assert!(!moves.contains(&not_possible_move));
-    assert!(moves.contains(&takes_possible_move));
+    assert!(!moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(1, 1)
+    ))));
 }
 
 #[test]
-fn queen_test() {
-    let queen_test_code = ".........Q.......................................p....p.........";
-    let game = Game::from_string(queen_test_code).unwrap();
+fn bishop_moves() {
+    let start_code = "....k..K\
+                      B.......\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::White,
+        false,
+        PieceType::Bishop,
+        Coord::from_x_and_y(0, 6)
+    );
 
-    let moves = game.get_all_moves(White);
+    let moves = get_piece_moves(&game, piece);
 
-    // 8 Bishop like moves, 13 Rook like moves
-    assert_eq!(moves.len(), 8 + 13);
+    assert_eq!(moves.len(), 1+6);
 
-    let possible_move_diag = Move {
-        piece: Queen,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(4, 3)
-    };
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(1, 7)
+    ))));
 
-    let possible_move_vert = Move {
-        piece: Queen,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(7, 6)
-    };
-
-    let impossible_move_diag = Move {
-        piece: Queen,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(7, 0)
-    };
-
-    let impossible_move_vert = Move {
-        piece: Queen,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(1, 0)
-    };
-
-    let takes_move_diag = Move {
-        piece: Queen,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(6, 1)
-    };
-
-    let takes_move_vert = Move {
-        piece: Queen,
-        from: Coord::XandY(1, 6),
-        to: Coord::XandY(1, 1)
-    };
-
-    assert!(moves.contains(&possible_move_diag));
-    assert!(moves.contains(&possible_move_vert));
-    assert!(!moves.contains(&impossible_move_diag));
-    assert!(!moves.contains(&impossible_move_vert));
-    assert!(moves.contains(&takes_move_diag));
-    assert!(moves.contains(&takes_move_vert));
+    assert!(!moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(1, 1)
+    ))));
 }
 
 #[test]
-fn knight_test() {
-    let knight_test_code = "...................N............................................";
-    let game = Game::from_string(knight_test_code).unwrap();
+fn rook_moves() {
+    let start_code = "....k..K\
+                      R.......\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::White,
+        false,
+        PieceType::Rook,
+        Coord::from_x_and_y(0, 6)
+    );
 
-    let moves = game.get_all_moves(White);
+    let moves = get_piece_moves(&game, piece);
 
-    assert_eq!(moves.len(), 8);
+    assert_eq!(moves.len(), 7+7);
 
-    let possible_move = Move {
-        piece: Knight,
-        from: Coord::XandY(3, 5),
-        to: Coord::XandY(1, 6)
-    };
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(0, 0)
+    ))));
 
-    assert!(moves.contains(&possible_move))
+    assert!(!moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(1, 1)
+    ))));
 }
 
 #[test]
-fn pawn_test() {
-    let basic_pawn_test_code = "............................................q.q......P.P........";
-    let game = Game::from_string(basic_pawn_test_code).unwrap();
+fn knight_moves() {
+    let start_code = "....k..K\
+                      N.......\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::White,
+        false,
+        PieceType::Knight,
+        Coord::from_x_and_y(0, 6)
+    );
 
-    let moves = game.get_all_moves(White);
+    let moves = get_piece_moves(&game, piece);
 
-    assert_eq!(moves.len(), 7);
+    assert_eq!(moves.len(), 3);
 
-    let possible_takes_move = Move {
-        piece: Pawn {has_moved: true},
-        from: Coord::XandY(7, 1),
-        to: Coord::XandY(6, 2)
-    };
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(2, 7)
+    ))));
 
+    assert!(!moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(1, 1)
+    ))));
+}
 
+#[test]
+fn castle_test() {
+    let start_code = "r...k..r\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ..R.K...";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::Black,
+        false,
+        PieceType::King,
+        Coord::from_x_and_y(4, 7)
+    );
 
-    assert!(moves.contains(&possible_takes_move));
+    let moves = get_piece_moves(&game, piece);
+
+    assert_eq!(moves.len(), 6);
+
+    assert!(moves.contains(&Move::Castle(Castle::new(
+        piece,
+        Piece::new(Side::Black, false, PieceType::Rook, Coord::from_x_and_y(7, 7)),
+        Coord::from_x_and_y(4, 7),
+        Coord::from_x_and_y(7, 7),
+        Coord::from_x_and_y(6, 7),
+        Coord::from_x_and_y(5, 7)
+    ))));
+
+    assert!(!moves.contains(&Move::Castle(Castle::new(
+        piece,
+        Piece::new(Side::Black, false, PieceType::Rook, Coord::from_x_and_y(0, 7)),
+        Coord::from_x_and_y(4, 7),
+        Coord::from_x_and_y(0, 7),
+        Coord::from_x_and_y(2, 7),
+        Coord::from_x_and_y(3, 7)
+    ))));
+
+    let start_code = "r...k..r\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ....K...";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::Black,
+        false,
+        PieceType::King,
+        Coord::from_x_and_y(4, 7)
+    );
+
+    let moves = get_piece_moves(&game, piece);
+
+    assert!(moves.contains(&Move::Castle(Castle::new(
+        piece,
+        Piece::new(Side::Black, false, PieceType::Rook, Coord::from_x_and_y(0, 7)),
+        Coord::from_x_and_y(4, 7),
+        Coord::from_x_and_y(0, 7),
+        Coord::from_x_and_y(2, 7),
+        Coord::from_x_and_y(3, 7)
+    ))));
+}
+
+#[test]
+fn pawn_forward_move() {
+    let start_code = "....k...\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      P.......\
+                      ....K...";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::White,
+        false,
+        PieceType::Pawn,
+        Coord::from_x_and_y(0, 1)
+    );
+
+    let moves = get_piece_moves(&game, piece);
+
+    assert_eq!(moves.len(), 2);
+
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 1),
+        Coord::from_x_and_y(0, 3)
+    ))));
+
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 1),
+        Coord::from_x_and_y(0, 2)
+    ))));
+
+    assert!(!moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 1),
+        Coord::from_x_and_y(1, 2)
+    ))));
+
+    let start_code = "....k...\
+                      ........\
+                      ........\
+                      ........\
+                      .b......\
+                      ........\
+                      ...P....\
+                      ....K...";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::White,
+        false,
+        PieceType::Pawn,
+        Coord::from_x_and_y(3, 1)
+    );
+
+    let moves = get_piece_moves(&game, piece);
+
+    assert_eq!(moves.len(), 0);
+}
+
+#[test]
+fn pawn_capturing() {
+    let start_code = "....k...\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ..b.....\
+                      .P......\
+                      ....K...";
+    let game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = Piece::new(
+        Side::White,
+        false,
+        PieceType::Pawn,
+        Coord::from_x_and_y(1, 1)
+    );
+
+    let moves = get_piece_moves(&game, piece);
+
+    // Taking the bishop is the only legal move
+    assert_eq!(moves.len(), 1);
+
+    assert!(moves.contains(&Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(1, 1),
+        Coord::from_x_and_y(2, 2)
+    ))));
+}
+
+#[test]
+fn pawn_promotion() {
+    let start_code = "....k...\
+                      ........\
+                      P.......\
+                      ........\
+                      ........\
+                      ........\
+                      ........\
+                      ....K...";
+    let mut game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = game.get_piece_at(Coord::from_x_and_y(0, 5)).unwrap();
+
+    game.apply_unchecked_move(Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(0, 5),
+        Coord::from_x_and_y(0, 6)
+    )));
+
+    let moves = get_piece_moves(&game, game.get_piece_at(Coord::from_x_and_y(0, 6)).unwrap());
+    assert_eq!(moves.len(), 4);
+
+    assert!(moves.contains(&Move::Promotion(Promotion::new(
+        game.get_piece_at(Coord::from_x_and_y(0, 6)).unwrap(),
+        Piece::new(
+            Side::White,
+            true,
+            PieceType::Queen,
+            Coord::from_x_and_y(0, 7)
+        ),
+        Coord::from_x_and_y(0, 6),
+        Coord::from_x_and_y(0, 7)
+    ))));
 }
