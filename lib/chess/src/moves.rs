@@ -493,5 +493,5 @@ fn add_promotions(old_move: Move, moves: &mut Vec<Move>) {
 }
 
 fn is_in_check_after_move(game: &Game, move_: Move) -> bool {
-    (*game).clone().apply_unchecked_move(move_).is_side_in_check(move_.get_side())
+    (*game).clone().apply_unchecked_move(move_, false).is_side_in_check(move_.get_side())
 }

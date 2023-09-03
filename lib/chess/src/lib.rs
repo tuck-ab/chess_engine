@@ -6,9 +6,5 @@ mod pieces;
 mod game;
 mod moves;
 
-use game::Game;
-
-pub fn new_game() -> Game {
-    Game::new()
-}
-
+pub use game::Game;
+pub use pieces::Side;

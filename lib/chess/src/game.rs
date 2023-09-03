@@ -10,7 +10,8 @@ pub struct Game {
     white_king_loc: Coord,
     black_king_loc: Coord,
     current_turn: Side,
-    previous_move: Option<Move>
+    previous_move: Option<Move>,
+    winner: Option<Side>,
 }
 
 impl std::fmt::Debug for Game {
@@ -81,11 +82,22 @@ impl Game {
         self.previous_move
     }
 
+    /// Gets the winner if one side is in checkmate. Returns `None` if
+    /// game is still ongoing
+    pub fn get_winner(&self) -> Option<Side> {
+        self.winner
+    }
+
+    /// Gets the side to make a move
+    pub fn get_side_to_play(&self) -> Side {
+        self.current_turn
+    }
+
 
     pub fn apply_move(&mut self, move_: Move) -> Result<(), MoveError> {
         if self.get_valid_moves().contains(&move_) {
             // Move has been checked so can use the unsafe function
-            self.apply_unchecked_move(move_);
+            self.apply_unchecked_move(move_, true);
         } else {
             return Err(MoveError::InvalidMove)
         }
@@ -98,7 +110,7 @@ impl Game {
     /// ensure the move is valid. Ensure move is valid before calling this
     /// function otherwise unexpected behaviour may be experienced. If unsure
     /// whether move is valid use the safer `apply_move` function
-    pub fn apply_unchecked_move(&mut self, move_: Move) -> Self {
+    pub fn apply_unchecked_move(&mut self, move_: Move, check_checkmate: bool) -> Self {
         match move_ {
             Move::Standard(m) => {
                 // Make square "to" have piece
@@ -154,6 +166,12 @@ impl Game {
 
         // Update the previous move
         self.previous_move = Some(move_);
+
+        if check_checkmate {
+            if self.get_valid_moves().len() == 0 {
+                self.winner = Some(move_.get_side());
+            }
+        }
 
         *self
     }
@@ -253,7 +271,8 @@ impl Game {
             white_king_loc: white_king_loc.unwrap(), 
             black_king_loc: black_king_loc.unwrap(),
             current_turn: start_side,
-            previous_move: None
+            previous_move: None,
+            winner: None
         })
     }
 }

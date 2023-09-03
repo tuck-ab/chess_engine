@@ -391,7 +391,7 @@ fn pawn_promotion() {
         piece, 
         Coord::from_x_and_y(0, 5),
         Coord::from_x_and_y(0, 6)
-    )));
+    )), false);
 
     let moves = get_piece_moves(&game, game.get_piece_at(Coord::from_x_and_y(0, 6)).unwrap());
     assert_eq!(moves.len(), 4);
@@ -410,7 +410,7 @@ fn pawn_promotion() {
 
     assert!(moves.contains(&promoting_move));
 
-    game.apply_unchecked_move(promoting_move);
+    game.apply_unchecked_move(promoting_move, false);
 
     assert!(game.get_piece_at(Coord::from_x_and_y(0, 7)).is_some());
     assert!(game.get_piece_at(Coord::from_x_and_y(0, 7)).unwrap().is_type(PieceType::Queen))
@@ -433,7 +433,7 @@ fn en_passant() {
         black_piece, 
         Coord::from_x_and_y(1, 6),
         Coord::from_x_and_y(1, 4)
-    )));
+    )), false);
 
     let moves = game.get_valid_moves();
     let test_move = Move::EnPassant(EnPassant { 
@@ -459,4 +459,27 @@ fn en_passant() {
 
     let moves = game.get_valid_moves();
     assert!(!moves.contains(&test_move));
+}
+
+#[test]
+fn checkmate() {
+    let start_code = ".....K.k\
+                            ........\
+                            ........\
+                            ........\
+                            ........\
+                            ........\
+                            ........\
+                            ......Q.";
+    let mut game = Game::from_string(start_code, Side::White).unwrap();
+    let piece = game.get_piece_at(Coord::from_x_and_y(6, 0)).unwrap();
+
+    game.apply_unchecked_move(Move::Standard(StandardMove::new(
+        piece, 
+        Coord::from_x_and_y(6, 0),
+        Coord::from_x_and_y(6, 7)
+    )), true);
+
+    assert_eq!(game.get_valid_moves().len(), 0);
+    assert_eq!(game.get_winner(), Some(Side::White));
 }
