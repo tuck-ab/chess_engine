@@ -396,7 +396,7 @@ fn pawn_promotion() {
     let moves = get_piece_moves(&game, game.get_piece_at(Coord::from_x_and_y(0, 6)).unwrap());
     assert_eq!(moves.len(), 4);
 
-    assert!(moves.contains(&Move::Promotion(Promotion::new(
+    let promoting_move = Move::Promotion(Promotion::new(
         game.get_piece_at(Coord::from_x_and_y(0, 6)).unwrap(),
         Piece::new(
             Side::White,
@@ -406,5 +406,57 @@ fn pawn_promotion() {
         ),
         Coord::from_x_and_y(0, 6),
         Coord::from_x_and_y(0, 7)
-    ))));
+    ));
+
+    assert!(moves.contains(&promoting_move));
+
+    game.apply_unchecked_move(promoting_move);
+
+    assert!(game.get_piece_at(Coord::from_x_and_y(0, 7)).is_some());
+    assert!(game.get_piece_at(Coord::from_x_and_y(0, 7)).unwrap().is_type(PieceType::Queen))
+}
+
+#[test]
+fn en_passant() {
+    let start_code = "....k...\
+                      .p......\
+                      ........\
+                      ..P.....\
+                      ........\
+                      ........\
+                      ........\
+                      ....K...";
+    let mut game = Game::from_string(start_code, Side::Black).unwrap();
+    let black_piece = game.get_piece_at(Coord::from_x_and_y(1, 6)).unwrap();
+
+    game.apply_unchecked_move(Move::Standard(StandardMove::new(
+        black_piece, 
+        Coord::from_x_and_y(1, 6),
+        Coord::from_x_and_y(1, 4)
+    )));
+
+    let moves = game.get_valid_moves();
+    let test_move = Move::EnPassant(EnPassant { 
+        piece: game.get_piece_at(Coord::from_x_and_y(2, 4)).unwrap(), 
+        from: Coord::from_x_and_y(2, 4), 
+        to: Coord::from_x_and_y(1, 5), 
+        piece_taken: game.get_piece_at(Coord::from_x_and_y(1, 4)).unwrap(), 
+        coord_taken: Coord::from_x_and_y(1, 4) 
+    });
+
+    assert!(moves.contains(&test_move));
+
+    game.apply_move(Move::Standard(StandardMove::new(
+        game.get_piece_at(Coord::from_x_and_y(4, 0)).unwrap(), 
+        Coord::from_x_and_y(4, 0),
+        Coord::from_x_and_y(5, 0)
+    )));
+    game.apply_move(Move::Standard(StandardMove::new(
+        game.get_piece_at(Coord::from_x_and_y(4, 7)).unwrap(), 
+        Coord::from_x_and_y(4, 7),
+        Coord::from_x_and_y(5, 7)
+    )));
+
+    let moves = game.get_valid_moves();
+    assert!(!moves.contains(&test_move));
 }

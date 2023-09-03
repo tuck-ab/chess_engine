@@ -2,9 +2,9 @@
 mod tests;
 
 pub mod coord;
-pub mod pieces;
-pub mod game;
-pub mod moves;
+mod pieces;
+mod game;
+mod moves;
 
 use game::Game;
 

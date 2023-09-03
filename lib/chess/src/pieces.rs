@@ -18,6 +18,13 @@ impl Side{
             Black => 0
         }
     }
+
+    pub fn get_dir(&self) -> i8 {
+        match *self {
+            White => 1,
+            Black => -1
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]

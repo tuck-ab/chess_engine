@@ -76,6 +76,11 @@ impl Game {
         self.board[self.black_king_loc.get_index()].unwrap()
     }
 
+    /// Gets the previous move
+    pub fn get_previous_move(&self) -> Option<Move> {
+        self.previous_move
+    }
+
 
     pub fn apply_move(&mut self, move_: Move) -> Result<(), MoveError> {
         if self.get_valid_moves().contains(&move_) {
@@ -125,8 +130,22 @@ impl Game {
                     Side::Black => self.black_king_loc = m.king_to
                 };
             },
-            Move::Promotion(_m) => {
-                todo!("Implimentation for promotion")
+            Move::Promotion(m) => {
+                // Add promoted piece
+                self.board[m.to.get_index()] = Some(m.new_piece);
+
+                // Remove old piece
+                self.board[m.from.get_index()] = None;
+            },
+            Move::EnPassant(m) => {
+                // Move the pawn
+                self.board[m.to.get_index()] = Some(m.piece.clone().move_to(m.to));
+
+                // Remove the pawn from the old square
+                self.board[m.from.get_index()] = None;
+
+                // Remove the taken piece
+                self.board[m.coord_taken.get_index()] = None;
             }
         }
 

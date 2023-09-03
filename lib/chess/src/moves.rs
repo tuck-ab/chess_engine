@@ -8,7 +8,8 @@ use crate::game::Game;
 pub enum Move {
     Standard(StandardMove),
     Castle(Castle),
-    Promotion(Promotion)
+    Promotion(Promotion),
+    EnPassant(EnPassant)
 }
 
 impl Move {
@@ -16,7 +17,8 @@ impl Move {
         match *self {
             Self::Standard(move_) => move_.from,
             Self::Castle(move_) => move_.king_from,
-            Self::Promotion(move_) => move_.from
+            Self::Promotion(move_) => move_.from,
+            Self::EnPassant(move_) => move_.from
         }
     }
 
@@ -24,7 +26,8 @@ impl Move {
         match *self {
             Self::Standard(move_) => move_.to,
             Self::Castle(move_) => move_.king_to,
-            Self::Promotion(move_) => move_.to
+            Self::Promotion(move_) => move_.to,
+            Self::EnPassant(move_) => move_.to
         }
     }
 
@@ -32,7 +35,8 @@ impl Move {
         match *self {
             Self::Standard(move_) => move_.piece,
             Self::Castle(move_) => move_.king_piece,
-            Self::Promotion(move_) => move_.old_piece
+            Self::Promotion(move_) => move_.old_piece,
+            Self::EnPassant(move_) => move_.piece
         }
     }
 
@@ -92,6 +96,15 @@ impl Promotion {
     pub fn new(old_piece: Piece, new_piece: Piece, from: Coord, to: Coord) -> Self {
         Self { old_piece, new_piece, from, to }
     }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct EnPassant {
+    pub piece: Piece,
+    pub from: Coord,
+    pub to: Coord,
+    pub piece_taken: Piece,
+    pub coord_taken: Coord
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -419,7 +432,7 @@ pub fn get_piece_moves(game: &Game, piece: Piece) -> Vec<Move> {
         }
     }
 
-    // Add non-targeting pawn moves
+    // Add non-targeting pawn moves and en passant
     if piece.is_type(PieceType::Pawn) {
         for move_ in get_pawn_moves(game, piece) {
             // Check if the move results in a pawn promotion
@@ -430,6 +443,23 @@ pub fn get_piece_moves(game: &Game, piece: Piece) -> Vec<Move> {
                     moves.push(move_)
                 }
             }
+        }
+
+        if game.get_previous_move()
+        .map(
+            |m| m.get_piece().is_type(PieceType::Pawn) && 
+            ((piece.get_loc().get_x_and_y()[0] - m.get_to().get_x_and_y()[0]).abs() == 1) &&
+            ((m.get_from().get_x_and_y()[1] - m.get_to().get_x_and_y()[1]).abs() == 2)
+        ).unwrap_or(false) {
+            moves.push(Move::EnPassant(EnPassant { 
+                piece, 
+                from: piece.get_loc(), 
+                to: Coord::from_x_and_y(
+                    game.get_previous_move().unwrap().get_piece().get_loc().get_x_and_y()[0], 
+                    piece.get_loc().get_x_and_y()[1] + piece.get_side().get_dir()), 
+                piece_taken: game.get_piece_at(game.get_previous_move().unwrap().get_to()).unwrap(), 
+                coord_taken: game.get_previous_move().unwrap().get_to()
+            }))
         }
     }
 
@@ -464,16 +494,4 @@ fn add_promotions(old_move: Move, moves: &mut Vec<Move>) {
 
 fn is_in_check_after_move(game: &Game, move_: Move) -> bool {
     (*game).clone().apply_unchecked_move(move_).is_side_in_check(move_.get_side())
-}
-
-pub fn get_side_moves(game: &Game, side: Side) -> Vec<Move> {
-    let mut moves: Vec<Move> = Vec::new();
-
-    for piece in game.iter() {
-        if piece.is_side(side) {
-            moves.append(&mut get_piece_moves(game, piece))
-        }
-    }
-
-    moves
 }
