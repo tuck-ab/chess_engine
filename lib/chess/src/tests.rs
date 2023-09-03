@@ -450,12 +450,12 @@ fn en_passant() {
         game.get_piece_at(Coord::from_x_and_y(4, 0)).unwrap(), 
         Coord::from_x_and_y(4, 0),
         Coord::from_x_and_y(5, 0)
-    )));
+    ))).unwrap();
     game.apply_move(Move::Standard(StandardMove::new(
         game.get_piece_at(Coord::from_x_and_y(4, 7)).unwrap(), 
         Coord::from_x_and_y(4, 7),
         Coord::from_x_and_y(5, 7)
-    )));
+    ))).unwrap();
 
     let moves = game.get_valid_moves();
     assert!(!moves.contains(&test_move));
