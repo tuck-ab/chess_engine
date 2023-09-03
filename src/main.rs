@@ -24,11 +24,9 @@ mod humanplayer;
 use humanplayer::HumanPlayer;
 
 fn main() {
-    let mut game = new_game();
+    let cli = Cli::parse();
 
-    // Because we get the moves from the game, it is trusted and so can be
-    // done unchecked
-    game.apply_unchecked_move(game.get_valid_moves()[0]);
+    let mut game = chess::Game::new();
 
     println!("{:?}", game);
 
