@@ -28,9 +28,22 @@ fn main() {
 
     let mut game = chess::Game::new();
 
-    println!("{:?}", game);
+    let white: Box<dyn Player> = decode_player_arg(cli.white);
+    let black: Box<dyn Player> = decode_player_arg(cli.black);
 
-    for (i, move_) in game.get_valid_moves().iter().enumerate() {
-        println!("{}: {:?}", i+1, move_);
+    while game.get_winner().is_none() {
+        match game.get_side_to_play() {
+            chess::Side::White => white.make_move(&mut game),
+            chess::Side::Black => black.make_move(&mut game)
+        }
+    }
+
+    println!("{:?}", game)
+
+}
+
+fn decode_player_arg(arg: PlayerMode) -> Box<dyn Player> {
+    match arg {
+        PlayerMode::Human => Box::new(HumanPlayer {})
     }
 }

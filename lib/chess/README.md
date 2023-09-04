@@ -20,3 +20,5 @@ rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR
 
 Change `Coord` to add a `get_x` and `get_y` instead of having to use 
 `get_x_and_y` and index the result
+
+Add stalemate logic

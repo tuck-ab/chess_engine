@@ -447,9 +447,10 @@ pub fn get_piece_moves(game: &Game, piece: Piece) -> Vec<Move> {
 
         if game.get_previous_move()
         .map(
-            |m| m.get_piece().is_type(PieceType::Pawn) && 
-            ((piece.get_loc().get_x_and_y()[0] - m.get_to().get_x_and_y()[0]).abs() == 1) &&
-            ((m.get_from().get_x_and_y()[1] - m.get_to().get_x_and_y()[1]).abs() == 2)
+            |m| m.get_piece().is_type(PieceType::Pawn) && // If the piece in the previous move was a pawn
+            ((m.get_from().get_x_and_y()[1] - m.get_to().get_x_and_y()[1]).abs() == 2) && // If the previous move was a double move
+            ((piece.get_loc().get_x_and_y()[0] - m.get_to().get_x_and_y()[0]).abs() == 1) && // If pawn is in adjacent column
+            (m.get_to().get_x_and_y()[1] == piece.get_loc().get_x_and_y()[1]) // If piece is in the same row
         ).unwrap_or(false) {
             moves.push(Move::EnPassant(EnPassant { 
                 piece, 

@@ -4,6 +4,11 @@ use crate::moves::{Move, get_side_targets, get_piece_moves, MoveError};
 use crate::pieces::*;
 use crate::coord::*;
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum GameErrors {
+    PieceNotOnBoard
+}
+
 #[derive(Clone, Copy)]
 pub struct Game {
     board: [Option<Piece>; 64],
@@ -186,6 +191,29 @@ impl Game {
         });
 
         result
+    }
+
+
+    pub fn get_pieces(&self) -> Vec<Piece> {
+        self.iter()
+            .filter(|x| x.is_side(self.current_turn))
+            .collect()
+    }
+
+
+    pub fn get_moves_for_piece(&self, piece: Piece) -> Result<Vec<Move>, GameErrors> {
+        if self.get_piece_at(piece.get_loc()) != Some(piece) {
+            return Err(GameErrors::PieceNotOnBoard)
+        }
+
+        Ok(get_piece_moves(self, piece))
+    }
+
+
+    /// This does not check whether the piece in question is on the board. For
+    /// a safer function that validates the piece use `Game::get_moves_for_piece`
+    pub fn get_moves_for_unchecked_piece(&self, piece: Piece) -> Vec<Move> {
+        get_piece_moves(self, piece)
     }
 
 
