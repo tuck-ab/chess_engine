@@ -13,7 +13,8 @@ struct Cli {
 
 #[derive(Copy, Clone, PartialEq, Eq, ValueEnum, Debug)]
 enum PlayerMode {
-    Human
+    Human,
+    Random
 }
 
 trait Player {
@@ -22,6 +23,9 @@ trait Player {
 
 mod humanplayer;
 use humanplayer::HumanPlayer;
+
+mod randombot;
+use randombot::RandomPlayer;
 
 fn main() {
     let cli = Cli::parse();
@@ -44,6 +48,7 @@ fn main() {
 
 fn decode_player_arg(arg: PlayerMode) -> Box<dyn Player> {
     match arg {
-        PlayerMode::Human => Box::new(HumanPlayer {})
+        PlayerMode::Human => Box::new(HumanPlayer {}),
+        PlayerMode::Random => Box::new(RandomPlayer {})
     }
 }
