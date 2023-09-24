@@ -31,8 +31,8 @@ fn main() {
     let white: Box<dyn Player> = decode_player_arg(cli.white);
     let black: Box<dyn Player> = decode_player_arg(cli.black);
 
-    while game.get_winner().is_none() {
-        match game.get_side_to_play() {
+    while game.is_playing() {
+        match game.current_side().unwrap() {
             chess::Side::White => white.make_move(&mut game),
             chess::Side::Black => black.make_move(&mut game)
         }

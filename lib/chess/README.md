@@ -12,9 +12,16 @@
 | Pawn   | P     | p     |
 | Empty  | .     | .
 
-### Inital board state
+### Initial board state
 
 rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR
+
+## Chess API
+
+* New game
+* Get move list
+* Make move
+* Get state
 
 ## TODO
 
